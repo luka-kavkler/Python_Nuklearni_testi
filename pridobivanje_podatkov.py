@@ -1,6 +1,6 @@
 import re
 import requests
-from razredi import Nuk_t
+from razredi import Nuk_t, Neimenovan, Drzava
 
 
 def preberi(url, tag_tabele = '<table class="table table-striped table-sm">'):
@@ -15,13 +15,34 @@ def preberi(url, tag_tabele = '<table class="table table-striped table-sm">'):
     return tekst
 
 
-def izlusci_posamezne_vrstice(tekst_tabela):
-    """Tabelo vnosov za države razdeli na vrstice
+def izlusci_am(tekst_tabela):
+    """Tabelo vnosov za države razdeli na vrstice, prilagojeno na spletno stran amerike
     vrstica: [ime_serije, leta (par, z zacetnim in koncnim letom), stevilo_testov, rang energije, skupna sproščena energija(v kilotonah)]
     """
     serije = re.split('<tr>',tekst_tabela)[2:] #vrze vn tisto z naslovi pa eno spredaj, ki ne vem od kod pride
     serije = list(map(lambda tr: re.findall(r'<th>(.+?)</t[hd]>', tr) + re.findall(r'<td class="text-right">(.+?)</t[db]', tr), serije))
-    return serije [:-1]
+    return serije[:-1]
+
+
+
+def izlusci_fr_kt_ru(tekst_tabela):
+    """Prilagojen regex za spletno stran s francoskimi, ruskimi ali kitrajskimi testi"""
+    serije = re.split('<tr>',tekst_tabela)[2:] #vrze vn tisto z naslovi pa eno spredaj, ki ne vem od kod pride
+    serije = list(map(lambda tr: re.findall(r'<th>(.+?)</t[hd]>', tr) + re.findall(r'<td>(.+?)</t[db]', tr) + re.findall(r'<td class="text-right">(.+?)</t[db]', tr), serije))
+    return serije[:-1]
+
+
+def izlusci_brit(tekst_tabela):
+    """Prilagojen regex za spletno stran z britanskimi testi"""
+    serije = re.split('<tr>',tekst_tabela)[2:] #vrze vn tisto z naslovi pa eno spredaj, ki ne vem od kod pride
+    serije = list(map(lambda tr: re.findall(r'<th>(.+?)</th>', tr) + re.findall(r'<td>(.+?)</td', tr) + re.findall(r'<td class="text-right">(.+?)</t[db]', tr), serije)) 
+    for i, tr in enumerate(serije):
+        if len(tr) == 6:
+            serije[i] = tr[:2] + tr[3:] #režem notes pri vsaki vrstici, kjer se pojavi
+    return serije[:-1]
+
+
+
 
 def ustvari_objekte(tabela_vrstic):
     """Dano seznam vrstic nuklearnih testov oblike:
@@ -29,28 +50,44 @@ def ustvari_objekte(tabela_vrstic):
     pretvori v seznam objektov tipa Nuk_t
     """
     nuk_testi = list()
-    
     for tr in tabela_vrstic:
-        print(tr)
+        tr = list(map(lambda td: re.sub(r"<.*?>", "", td), tr)) #francozi majo italic tage
+        tr = [td for td in tr if td != ' ' and td != '']
+        if len(tr) != 5: #kitajci nimajo imen serije
+            tr = [''] + tr  
         serija, leta, st_testov, rang_energije, skupna_energija = tr
         if '-' in leta:
             zac, kon = leta.split('-')
             leta = (int(zac), int(zac[:2] +kon))
         elif '–' in leta:
             zac, kon = leta.split('–')
-            leta = (int(zac), int(zac[:2] + kon))
+            if len(kon) == 2:
+                leta = (int(zac), int(zac[:2] + kon))
+            else:
+                leta = (int(zac), int(kon))
         else:
             leta = (int(leta), int(leta))
         st_testov = int(st_testov)
-        skupna_energija = int(skupna_energija.replace(',',''))
-        nuk_testi.append(Nuk_t(serija, leta, st_testov, skupna_energija))
+        skupna_energija = int(skupna_energija.replace(',','')) if '.' not in skupna_energija else int(float(skupna_energija.replace(',','')))
+        if serija and serija != '---':
+            nuk_testi.append(Nuk_t(serija, leta, st_testov, skupna_energija))
+        else:
+            nuk_testi.append(Neimenovan(leta, st_testov, skupna_energija))
     return nuk_testi
 
 
+url_am = 'https://www.atomicarchive.com/almanac/test-sites/us-testing.html'
+url_ki = 'https://www.atomicarchive.com/almanac/test-sites/prc-testing.html'
+url_fr = 'https://www.atomicarchive.com/almanac/test-sites/french-testing.html'
+url_brit = 'https://www.atomicarchive.com/almanac/test-sites/uk-testing.html'
+url_rus = 'https://www.atomicarchive.com/almanac/test-sites/soviet-testing.html'
 
 
+Amerika = Drzava('Amerika', ustvari_objekte(izlusci_am(preberi(url_am))))
+Francija = Drzava('Francija', ustvari_objekte(izlusci_fr_kt_ru(preberi(url_fr))))
+Kitajska = Drzava('Kitajska', ustvari_objekte(izlusci_fr_kt_ru(preberi(url_ki))))
+Vel_britanija = Drzava('Velika Britanija', ustvari_objekte(izlusci_brit(preberi(url_brit))))
+Rusija = Drzava('Rusija', ustvari_objekte(izlusci_fr_kt_ru(preberi(url_rus))))
 
-
-url = 'https://www.atomicarchive.com/almanac/test-sites/us-testing.html'
-    
-print(ustvari_objekte(izlusci_posamezne_vrstice(preberi(url))))
+#print(Amerika, '\n', Francija, '\n', Kitajska, '\n', Vel_britanija, '\n', Rusija)
+#print('Kitajska', Kitajska.get_najbolj_unicujoca())
