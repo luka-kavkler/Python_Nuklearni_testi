@@ -41,7 +41,23 @@ def izlusci_brit(tekst_tabela):
             serije[i] = tr[:2] + tr[3:] #režem notes pri vsaki vrstici, kjer se pojavi
     return serije[:-1]
 
+def izlusci_zaloge(tekst_tabela):
+    """Prilagojen regex za spletno stran z zalogami nuklearnih orožij,
+    izluščil bom samo zalogo iz leta 2020
+    vrne pare (drzava, zaloga)
+    """
+    zaloge = re.split('<tr>',tekst_tabela)[2:-1] #vrze vn tisto z naslovi pa eno spredaj, ki ne vem od kod pride + zadnjo z vsotami
+    zaloge = list(map(lambda tr: [re.search(r'<th>(.+?)</th>', tr).group(1), re.findall(r'<td class="text-right">(.+?)</t[db]', tr)[-1]], zaloge))
+    return zaloge
 
+def pretvori_zaloge_v_slovar(zaloge, imena_drzav):
+    """rezultat funkcije izlusci_zaloge pretvori v slovar
+    imena drzav so slovar, ki bo imena drzav iz zaloge prevedel v slovenscino
+    """
+    slovar_zalog = dict()
+    for drzava, zaloga in zaloge:
+        slovar_zalog[imena_drzav[drzava]] = int(zaloga.replace(',',''))
+    return slovar_zalog
 
 
 def ustvari_objekte(tabela_vrstic):
@@ -76,18 +92,35 @@ def ustvari_objekte(tabela_vrstic):
     return nuk_testi
 
 
+
+
+###Ustvarjanje objektov
 url_am = 'https://www.atomicarchive.com/almanac/test-sites/us-testing.html'
 url_ki = 'https://www.atomicarchive.com/almanac/test-sites/prc-testing.html'
 url_fr = 'https://www.atomicarchive.com/almanac/test-sites/french-testing.html'
 url_brit = 'https://www.atomicarchive.com/almanac/test-sites/uk-testing.html'
 url_rus = 'https://www.atomicarchive.com/almanac/test-sites/soviet-testing.html'
+url_zaloga = 'https://www.atomicarchive.com/almanac/stockpiles.html'
 
 
-Amerika = Drzava('Amerika', ustvari_objekte(izlusci_am(preberi(url_am))))
-Francija = Drzava('Francija', ustvari_objekte(izlusci_fr_kt_ru(preberi(url_fr))))
-Kitajska = Drzava('Kitajska', ustvari_objekte(izlusci_fr_kt_ru(preberi(url_ki))))
-Vel_britanija = Drzava('Velika Britanija', ustvari_objekte(izlusci_brit(preberi(url_brit))))
-Rusija = Drzava('Rusija', ustvari_objekte(izlusci_fr_kt_ru(preberi(url_rus))))
+imena_drzav = {'United States' : 'ZDA', 'India' : 'Indija', 'USSR/Russia' : 'USSR/Rusija', 'United&nbsp;Kingdom' : 'Velika Britanija', 'France' : 'Francija', 'China' : 'Kitajska', 'Pakistan' : 'Pakistan', 'North Korea' : 'Severna Koreja', 'Israel' : 'Izrael'}
+slovar_zalog = pretvori_zaloge_v_slovar(izlusci_zaloge(preberi(url_zaloga)), imena_drzav)
+drzave = list()
+for ime_drzave in imena_drzav.values():
+    tren_drzava = Drzava(ime_drzave, zaloga = slovar_zalog[ime_drzave] if ime_drzave in slovar_zalog else 0)
+    if ime_drzave == 'ZDA':
+        tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_am(preberi(url_am))))
+    elif ime_drzave == 'USSR/Rusija':
+        tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_fr_kt_ru(preberi(url_rus))))
+    elif ime_drzave == 'Francija':
+        tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_fr_kt_ru(preberi(url_fr))))
+    elif ime_drzave == 'Kitajska':
+        tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_fr_kt_ru(preberi(url_ki))))
+    elif ime_drzave == 'Velika Britanija':
+        tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_brit(preberi(url_brit))))
+    drzave.append(tren_drzava)
+for drzava in drzave:
+    print(drzava)
 
-#print(Amerika, '\n', Francija, '\n', Kitajska, '\n', Vel_britanija, '\n', Rusija)
-#print('Kitajska', Kitajska.get_najbolj_unicujoca())
+#opomba: Skupne količine energije pridejo malo drugače kot na spletni strani, ampak s kalkulatorjem mi je za Veliko Britanijo prišlo skozi, da imajo pač oni narobe in ne jaz;; so narobe sešteli zgleda
+
