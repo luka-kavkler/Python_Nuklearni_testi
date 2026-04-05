@@ -1,1 +1,4 @@
-piši not katere knjižnice rabiš
+geopandas
+matplotlib
+re
+requests
