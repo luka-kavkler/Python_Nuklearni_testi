@@ -4,6 +4,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt
 
 def parse_coord(coords):
+    """spremeni formatiranje koordinat"""
     vals = []
     for coord in coords:
         coord = coord.replace("~", "").replace("?", "").strip()
@@ -19,46 +20,59 @@ def parse_coord(coords):
         vals.append(value)
     return vals
 
+def getdata():
+    """vrne slovar z vrsticami za vsak stolpec v bazi podatkov"""
+    urls = ["https://www.johnstonsarchive.net/nuclear/atest45.html", "https://www.johnstonsarchive.net/nuclear/atest56.html", "https://www.johnstonsarchive.net/nuclear/atest58.html"
+            "https://www.johnstonsarchive.net/nuclear/atest60.html", "https://www.johnstonsarchive.net/nuclear/atest62.html", "https://www.johnstonsarchive.net/nuclear/atest63.html"]
 
-urls = ["https://www.johnstonsarchive.net/nuclear/atest45.html", "https://www.johnstonsarchive.net/nuclear/atest56.html", "https://www.johnstonsarchive.net/nuclear/atest58.html"
-        "https://www.johnstonsarchive.net/nuclear/atest60.html", "https://www.johnstonsarchive.net/nuclear/atest62.html", "https://www.johnstonsarchive.net/nuclear/atest63.html"]
+    text = ""
+    for url in urls:
+        req = requests.get(url)
 
-url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip" # nalozi ozadje 
-world = gpd.read_file(url)
+        text += req.text
 
-text = ""
-for url in urls:
-    req = requests.get(url)
+    rows = re.findall(r"<tr.*</tr>", text)
+    cols = re.findall(r"<th>(.*?)</th>", rows[0])
 
-    text += req.text
+    info = dict()
+    label = []
 
-rows = re.findall(r"<tr.*</tr>", text)
+    for col in cols:
+        info[col.strip()] = []
+        label.append(col.strip())
 
-cols = re.findall(r"<th>(.*?)</th>", rows[0])
+    for row in rows[1:]:
+        cols = re.findall(r"<td>(.*?)</td>", row)
+        for i in range(len(cols)):
+            info[label[i]] += [cols[i]]
 
-info = dict()
-label = []
+    return info
 
-for col in cols:
-    info[col.strip()] = []
-    label.append(col.strip())
+def draw_map(info):
+    """narise tocke na zemljevidu iz podatkov"""
 
-for row in rows[1:]:
-    cols = re.findall(r"<td>(.*?)</td>", row)
-    for i in range(len(cols)):
-        info[label[i]] += [cols[i]]
-
-info["longitude"] = parse_coord(info["longitude"])
-info["latitude"] = parse_coord(info["latitude"])
-points = gpd.GeoDataFrame(
-    geometry=gpd.points_from_xy(
-        info["longitude"],  # longitude
-        info["latitude"]  # latitude
+    url = "https://naturalearth.s3.amazonaws.com/110m_cultural/ne_110m_admin_0_countries.zip" # nalozi ozadje 
+    world = gpd.read_file(url)
+    
+    info["longitude"] = parse_coord(info["longitude"])
+    info["latitude"] = parse_coord(info["latitude"])
+    
+    points = gpd.GeoDataFrame(
+        geometry=gpd.points_from_xy(
+            info["longitude"],  # longitude
+            info["latitude"]  # latitude
+        )
     )
-)
+    world.plot()
+    points.plot(ax=plt.gca(), color='red')
+
+    plt.show()
 
 
-world.plot()
-points.plot(ax=plt.gca(), color='red')
+info = getdata()
+draw_map(info)
 
-plt.show()
+
+
+
+
