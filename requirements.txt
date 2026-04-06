@@ -1,5 +1,10 @@
-geopandas
-matplotlib
 requests
-simpleaudio
-numpy
+numpy 
+geopandas 
+matplotlib.pyplot 
+matplotlib.image 
+matplotlib.animation 
+threading
+pygame
+datetime 
+collections
