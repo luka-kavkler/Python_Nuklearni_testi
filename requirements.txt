@@ -1,4 +1,5 @@
 geopandas
 matplotlib
-re
 requests
+simpleaudio
+numpy
