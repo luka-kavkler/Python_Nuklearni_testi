@@ -6,8 +6,11 @@ import matplotlib.image as mplimg
 import matplotlib.animation as animation
 import threading
 import pygame
+import re
 from datetime import datetime
 from collections import deque
+from linecache import getline
+
 
 # ── Audio setup 
 pygame.mixer.init()
@@ -59,11 +62,17 @@ def getdata():
         "https://www.johnstonsarchive.net/nuclear/tests/PRC-ntestsH.html",
         "https://www.johnstonsarchive.net/nuclear/tests/OTH-ntests1.html",
     ]
+    novtext = ""
+    for u in urls:
+        req = requests.get(u)
+        text = req.text
+        for line in text.splitlines():
+            line = line[:-2] + "   " + re.search(r'/([A-Z]+)-', u).group(1) + "\n"
+            novtext += line
+        
+    info = {"id": [], "series": [], "shot": [], "date": [], "lat": [], "lon": [], "country": []}
 
-    text = "".join(requests.get(u).text for u in urls)
-    info = {"id": [], "series": [], "shot": [], "date": [], "lat": [], "lon": []}
-
-    for line in text.splitlines():
+    for line in novtext.splitlines():
         if not line.strip() or not line.strip()[0].isdigit():
             continue
         try:
@@ -73,6 +82,7 @@ def getdata():
             date   = line[46:59].strip()
             lat    = line[84:94].strip()
             lon    = line[94:105].strip()
+            country = line[-4:].strip()
 
             if not lat or not lon:
                 continue
@@ -102,6 +112,7 @@ def getdata():
             info["date"].append(date)
             info["lat"].append(lat)
             info["lon"].append(lon)
+            info["country"].append(country)
         except Exception:
             continue
 
@@ -110,11 +121,12 @@ def getdata():
 # ── Animation 
 def animate_map(info, duration, map_path, fps=30):
     load_sound("Media/beep-10.wav")
-
+    print(len(info["country"]))
     fig, ax = plt.subplots(figsize=(12, 6))
     dates = info["date"]
     lats  = np.array(info["lat"])
     lons  = np.array(info["lon"])
+    country = np.array(info["country"])
 
     ax.imshow(mplimg.imread(map_path), extent=[-180, 180, -90, 90])
     scat = ax.scatter([], [], color='purple', s=10)
@@ -136,6 +148,9 @@ def animate_map(info, duration, map_path, fps=30):
     prev_count = [0]
     prev_mask  = [np.zeros(len(dates), dtype=bool)]  # ← track last frame's mask
     flash_buffer = deque()                            
+    L=plt.legend(loc=1) 
+    count_bombs_country = dict()
+    
     def update(frame_idx):
         current_time = frame_times[frame_idx]
         mask = np.array([d <= current_time for d in dates])
@@ -145,6 +160,7 @@ def animate_map(info, duration, map_path, fps=30):
         # ── guard against empty array ──
         if len(x) > 0:
             scat.set_offsets(np.column_stack((x, y)))
+
         else:
             scat.set_offsets(np.empty((0, 2)))
 
@@ -154,6 +170,19 @@ def animate_map(info, duration, map_path, fps=30):
         new_mask = mask & ~prev_mask[0]
         new_x    = lons[new_mask]
         new_y    = lats[new_mask]
+
+        nove_bombe = country[new_mask] # posodobi legendo bomb po državah
+        for bomba in nove_bombe:
+            if bomba in count_bombs_country:
+                count_bombs_country[bomba] += 1
+            else:
+                count_bombs_country[bomba] = 1
+
+        # rebuild legend
+        labels = [f"{k if k != "OTH" else "IN/PAK/NK"}: {v}" for k, v in count_bombs_country.items()]
+        handles = [plt.Line2D([], [], color='none') for _ in labels]
+
+        ax.legend(handles, labels, loc=1)
 
         for nx, ny in zip(new_x, new_y):
             flash_buffer.append((frame_idx + FLASH_FRAMES, nx, ny))
@@ -190,4 +219,4 @@ def animate_map(info, duration, map_path, fps=30):
 
 
 info = getdata()
-animate_map(info, 100, "D:/Xander/Python_Nuklearni_testi/Media/map5.jpg")
+animate_map(info, 30, "D:/Xander/Python_Nuklearni_testi/Media/map5.jpg")

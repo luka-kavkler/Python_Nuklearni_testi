@@ -1,10 +1,7 @@
 requests
 numpy 
 geopandas 
-matplotlib.pyplot 
-matplotlib.image 
-matplotlib.animation 
-threading
+matplotlib
 pygame
 datetime 
-collections
+
