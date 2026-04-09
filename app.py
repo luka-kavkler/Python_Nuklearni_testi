@@ -148,7 +148,6 @@ def animate_map(info, duration, map_path, fps=30):
     prev_count = [0]
     prev_mask  = [np.zeros(len(dates), dtype=bool)]  # ← track last frame's mask
     flash_buffer = deque()                            
-    L=plt.legend(loc=1) 
     count_bombs_country = dict()
     
     def update(frame_idx):
@@ -219,4 +218,4 @@ def animate_map(info, duration, map_path, fps=30):
 
 
 info = getdata()
-animate_map(info, 30, "D:/Xander/Python_Nuklearni_testi/Media/map5.jpg")
+animate_map(info, 30, "Media/map5.jpg")
