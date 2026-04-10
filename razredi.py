@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 class Napaka_tipa(Exception):
     def __init__(self, niz):
         super().__init__(self,niz)
@@ -104,6 +106,43 @@ class Drzava:
                 izbrani_testi.append(test)
         return izbrani_testi
     
+    #Izris
+    def narisi_serije_po_skupni_energiji(self):
+        Y = [x.get_skupna_energija() for x in self.get_n_testi()]
+        labeli_za_X = [x.get_serija() for x in self.get_n_testi()]
+        vecji = sorted(Y)[:5]
+        vecji_i = [Y.index(x) for x in vecji]
+        izbrani_X = [labeli_za_X[i] for i in vecji_i]
+        
+        fig = plt.figure()
+        plt.plot(list(range(len(Y))),Y)
+        plt.yscale('log')
+        plt.xticks(vecji_i, izbrani_X, fontsize = 6)
+        plt.title('Serije po skupni energiji')
+        plt.show()
+        plt.close()
+        return
+
+
+    
+    def narisi_serije_po_povprecni_energiji(self):
+        Y = [x.get_povprecna() for x in self.get_n_testi()]
+        labeli_za_X = [x.get_serija() for x in self.get_n_testi()]
+        vecji = sorted(Y)[:5]
+        vecji_i = [Y.index(x) for x in vecji]
+        izbrani_X = [labeli_za_X[i] for i in vecji_i]
+
+        X = list(range(len(Y)))
+        fig = plt.figure()
+        plt.plot(X, Y)
+        plt.yscale('log')
+        plt.xticks(vecji_i, izbrani_X, fontsize = 6)
+        plt.title('Serije po povprecni energiji')
+        plt.show()
+        plt.close()
+        return
+
+
     #metode na objektih
     def spremeni_zalogo(self, kolicina):
         """Nastavi zalogo jedrskih orozij na izbrano kolicino in vrne novo nastavljeno vrednost zaloge"""
@@ -139,6 +178,7 @@ class Drzava:
         self.skupno_st_n_testov = sum(n_test.st_testov for n_test in nuk_testi) #skupno stevilo testov, čez vse serije, ki jih je izvedla država
         self.skupna_energija = sum([n_test.get_skupna_energija() for n_test in nuk_testi])
 
+    #Magične metode
     def __str__(self):
         return f'{self.get_ime()} je imela v letu 2020 na zalogi {self.get_zaloga()} kosov nuklearnega orozja.Do danes je država zabeležila že {self.get_skupno_st_n_testov()} posameznih nuklearnih testov,\
 ki jih je izvedla v sklopu {self.get_st_testov()} serij. Vsi testi skupaj so sprostili {self.get_skupna_energija()}kt energije. Najbolj uničujoč test je potekalo pod imenom {(self.get_najbolj_unicujoca()).get_serija()}, potekal je od leta {(self.get_najbolj_unicujoca()).get_leta()[0]} do \
