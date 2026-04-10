@@ -92,6 +92,8 @@ def ustvari_objekte(tabela_vrstic):
     return nuk_testi
 
 
+    
+
 
 
 ###Ustvarjanje objektov
@@ -119,8 +121,6 @@ for ime_drzave in imena_drzav.values():
     elif ime_drzave == 'Velika Britanija':
         tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_brit(preberi(url_brit))))
     drzave.append(tren_drzava)
-for drzava in drzave:
-    print(drzava)
 
 #opomba: Skupne količine energije pridejo malo drugače kot na spletni strani, ampak s kalkulatorjem mi je za Veliko Britanijo prišlo skozi, da imajo pač oni narobe in ne jaz;; so narobe sešteli zgleda
 

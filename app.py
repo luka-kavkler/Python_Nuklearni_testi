@@ -12,12 +12,6 @@ from collections import deque
 from linecache import getline
 
 
-# ── Audio setup 
-pygame.mixer.init()
-pygame.mixer.set_num_channels(200)   # do 200 simultanih piskov
-
-_sound = None  
-
 def load_sound(wav_path):
     global _sound
     _sound = pygame.mixer.Sound(wav_path)
@@ -178,7 +172,7 @@ def animate_map(info, duration, map_path, fps=30):
                 count_bombs_country[bomba] = 1
 
         # rebuild legend
-        labels = [f"{k if k != "OTH" else "IN/PAK/NK"}: {v}" for k, v in count_bombs_country.items()]
+        labels = [f'{k if k != "OTH" else "IN/PAK/NK"}: {v}' for k, v in count_bombs_country.items()]
         handles = [plt.Line2D([], [], color='none') for _ in labels]
 
         ax.legend(handles, labels, loc=1)
@@ -216,6 +210,12 @@ def animate_map(info, duration, map_path, fps=30):
     plt.show()
     return ani
 
+def prikazi_animacijo():
+    # ── Audio setup 
+    pygame.mixer.init()
+    pygame.mixer.set_num_channels(200)   # do 200 simultanih piskov
 
-info = getdata()
-animate_map(info, 30, "Media/map5.jpg")
+    _sound = None  
+
+    info = getdata()
+    animate_map(info, 30, "Media/map5.jpg")

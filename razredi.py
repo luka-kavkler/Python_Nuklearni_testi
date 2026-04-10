@@ -22,6 +22,8 @@ class Nuk_t:
         
         self.skupna_energija = skupna_energija #koliko energije v kilotonah se je sprostilo pri eksplozijah
 
+
+    #get metode
     def get_serija(self):
         return self.serija
     
@@ -34,13 +36,14 @@ class Nuk_t:
     def get_povprecna(self):
         return self.povprecna
     
-    def get_skupna(self):
+    def get_skupna_energija(self):
         return self.skupna_energija
 
+    #magicne metode
     def __repr__(self):
         return f'Serija: {self.serija}, leta: {self.leta}, st. testov: {self.st_testov}, povprecje: {self.povprecna}, skupno: {self.skupna_energija}'
    
-   
+#dedovano 
 class Neimenovan(Nuk_t):
     def __init__(self, leta, st_testov, skupna_energija):
         super().__init__('Neimenovan', leta, st_testov, skupna_energija)
@@ -55,6 +58,7 @@ class Drzava:
             raise Napaka_tipa('Seznam nuklearnih testov mora vsebovati izključno nuklearne teste')
         self.n_testi = n_testi #vsi nuklearni testi, ki jih je izvedla drzava
         
+        self.st_testov = len(n_testi)#stevilo serij n_testov
         self.skupno_st_n_testov = sum(n_test.st_testov for n_test in n_testi) #skupno stevilo testov, čez vse serije, ki jih je izvedla država
         
         if not isinstance(zaloga, int):
@@ -63,13 +67,17 @@ class Drzava:
             raise Napaka_tipa('Zaloga ne more biti negativna')
         self.zaloga = zaloga #zaloga je iz leta 2020
         
-        self.skupna_energija = sum([n_test.skupna for n_test in n_testi])
+        self.skupna_energija = sum([n_test.get_skupna_energija() for n_test in n_testi])
 
+    #get metode
     def get_ime(self):
         return self.ime
     
     def get_n_testi(self):
         return self.n_testi
+    
+    def get_st_testov(self):
+        return self.st_testov
     
     def get_skupno_st_n_testov(self):
         return self.skupno_st_n_testov
@@ -84,18 +92,19 @@ class Drzava:
         return max(self.n_testi, key = lambda x: x.st_testov) if self.n_testi else None
     
     def get_najbolj_unicujoca(self):
-        return max(self.n_testi, key = lambda x: x.skupna_energija)
+        return max(self.n_testi, key = lambda x: x.skupna_energija) if self.n_testi else None
     
     
     def get_izbrana_serija(self,izbrana):
-        """Vrne seznam vseh serije z izbranim imenom, ki jih
-        je ta država izvedla"""
+        """Vrne seznam vseh serij z izbranim imenom, ki jih
+        je ta država izvedla (pričakujemo enega, ampak mozno tudi vec)"""
         izbrani_testi = list()
         for test in self.n_testi:
             if test.get_serija() == izbrana:
                 izbrani_testi.append(test)
         return izbrani_testi
     
+    #metode na objektih
     def spremeni_zalogo(self, kolicina):
         """Nastavi zalogo jedrskih orozij na izbrano kolicino in vrne novo nastavljeno vrednost zaloge"""
         if not isinstance(kolicina, int):
@@ -110,7 +119,7 @@ class Drzava:
         self.n_testi.append(nuk_t)
         self.st_testov += 1
         self.skupno_st_n_testov = nuk_t.get_st_testov()
-        self.skupna_energija += nuk_t.get_skupna()
+        self.skupna_energija += nuk_t.get_skupna_energija()
     
     def dodaj_vec_nuk_testov(self, nuk_testi):
         """Doda vec nuk_t državi"""
@@ -119,7 +128,7 @@ class Drzava:
         self.n_testi.extend(nuk_testi)
         self.st_testov += len(nuk_testi)
         self.skupno_st_n_testov += sum([n_test.st_testov for n_test in nuk_testi]) 
-        self.skupna_energija += sum([n_test.get_skupna() for n_test in nuk_testi])
+        self.skupna_energija += sum([n_test.get_skupna_energija() for n_test in nuk_testi])
 
     def nastavi_nuk_teste(self, nuk_testi):
         """Zamenja trenutne nuklearne teste z novimi"""
@@ -128,10 +137,23 @@ class Drzava:
         self.n_testi = nuk_testi
         self.st_testov = len(nuk_testi)
         self.skupno_st_n_testov = sum(n_test.st_testov for n_test in nuk_testi) #skupno stevilo testov, čez vse serije, ki jih je izvedla država
-        self.skupna_energija = sum([n_test.get_skupna() for n_test in nuk_testi])
+        self.skupna_energija = sum([n_test.get_skupna_energija() for n_test in nuk_testi])
 
-    
-        
+    def __str__(self):
+        return f'{self.get_ime()} je imela v letu 2020 na zalogi {self.get_zaloga()} kosov nuklearnega orozja.Do danes je država zabeležila že {self.get_skupno_st_n_testov()} posameznih nuklearnih testov,\
+ki jih je izvedla v sklopu {self.get_st_testov()} serij. Vsi testi skupaj so sprostili {self.get_skupna_energija()}kt energije. Najbolj uničujoč test je potekalo pod imenom {(self.get_najbolj_unicujoca()).get_serija()}, potekal je od leta {(self.get_najbolj_unicujoca()).get_leta()[0]} do \
+leta {(self.get_najbolj_unicujoca()).get_leta()[1]}, pri čemer se je sprostilo {(self.get_najbolj_unicujoca()).get_skupna_energija()}kt energije, s povprečno vrednostjo {self.get_najbolj_unicujoca().get_povprecna()}kt na posamezni test v seriji.' if self.get_najbolj_unicujoca() else f'{self.get_ime()} je imela v letu 2020 na zalogi {self.get_zaloga()} kosov nuklearnega orozja. V naši bazi ni uradnih podatkov o njihovih testiranjih, kar pa ne pomeni, da se le ti niso zgodili.'
 
     def __repr__(self):
-        return f'Ime:\n{self.ime},\n,Najstevilcnejsi test:\n{self.get_najstevilcnejsa()},\nskupno st testov:\n{self.skupno_st_n_testov},\nZaloga: {self.zaloga},\n Skupna energija: {self.skupna_energija}kT' 
+        return f'Ime:\n{self.ime},\n,Najstevilcnejsi test:\n{self.get_najstevilcnejsa()},\nskupno st testov:\n{self.skupno_st_n_testov},\nZaloga: {self.zaloga},\n Skupna energija: {self.skupna_energija}kT'
+    
+    @staticmethod
+    def poisci_drzavo(drzave, ime):
+        """Iz seznama drzav izbere tisto, ki ustreza našemu imenu 
+        (če nobena vrne none + predpostavlja, da se vsaka država pojavi zgolj 1x)"""
+        drzava_l = [x for x in drzave if x.get_ime() == ime]
+        if drzava_l:
+            return drzava_l[0]
+        return None
+    
+
