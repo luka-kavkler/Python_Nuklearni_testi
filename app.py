@@ -210,7 +210,7 @@ def animate_map(info, duration, map_path, fps=30):
     plt.show()
     return ani
 
-def prikazi_animacijo():
+def prikazi_animacijo(time):
     # ── Audio setup 
     pygame.mixer.init()
     pygame.mixer.set_num_channels(200)   # do 200 simultanih piskov
@@ -218,4 +218,4 @@ def prikazi_animacijo():
     _sound = None  
 
     info = getdata()
-    animate_map(info, 30, "Media/map5.jpg")
+    animate_map(info, time, "Media/map5.jpg")

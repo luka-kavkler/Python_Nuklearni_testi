@@ -64,9 +64,10 @@ def risanje_grafov(drzava):
 
 
 while input('Te zanimajo nuklearna testiranja?(Ja/Ne):\n').lower() == 'ja':
-    if input('Želiš pogledati animacijo vseh testiranj?(Ja/Ne):\n').lower() == 'ja':
+    if input('Želiš pogledati zgodovinsko animacijo vseh atomskih testov?(Ja/Ne):\n').lower() == 'ja':
+        time = int(input('Koliko časa naj traja animacija? (optimalno med 30-60)'))
         print('Število vseh testiranj:')
-        prikazi_animacijo()
+        prikazi_animacijo(time)
     interesna = osnovne_informacije_o_drzavah()
     if input('Te zanima grafični prikaz?(Ja/Ne):\n').lower() == 'ja':
         risanje_grafov(interesna)
