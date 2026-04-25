@@ -124,7 +124,9 @@ class Drzava:
         plt.yscale('log')
         plt.xticks(top_5_i, izbrani_X, fontsize = 8, rotation = 45, ha = 'right')
         plt.title(f'Serije po skupni energiji ({self.get_ime()})')
-        plt.grid(True, which="both", linestyle="--", alpha=0.3)
+        plt.grid(True, which="both", linestyle = "-", alpha=0.5)
+        plt.xlabel('Ime in leta trajanja serije\n(5 najbolj uničujočih)', fontsize = 10, fontweight= 'bold' , labelpad = 15)
+        plt.ylabel('Sproščena energija(kT)', fontsize=10, fontweight='bold', labelpad=10)
 
         plt.tight_layout()
         plt.show()
@@ -150,7 +152,9 @@ class Drzava:
         plt.yscale('log')
         plt.xticks(top_5_i, izbrani_X, fontsize = 8, rotation = 45, ha = 'right')
         plt.title(f'Serije po povprecni energiji ({self.get_ime()})')
-        plt.grid(True, which="both", linestyle="--", alpha=0.3)
+        plt.grid(True, which="both", linestyle = "-", alpha=0.5)
+        plt.xlabel('Ime in leta trajanja serije\n(5 najbolj uničujočih)', fontsize = 10, fontweight= 'bold' , labelpad = 15)
+        plt.ylabel('Sproščena energija(kT)', fontsize=10, fontweight='bold', labelpad=10)
 
         plt.tight_layout()
         plt.show()
