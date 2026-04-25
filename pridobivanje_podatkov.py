@@ -104,15 +104,15 @@ url_brit = 'https://www.atomicarchive.com/almanac/test-sites/uk-testing.html'
 url_rus = 'https://www.atomicarchive.com/almanac/test-sites/soviet-testing.html'
 url_zaloga = 'https://www.atomicarchive.com/almanac/stockpiles.html'
 
-
-imena_drzav = {'United States' : 'ZDA', 'India' : 'Indija', 'USSR/Russia' : 'USSR/Rusija', 'United&nbsp;Kingdom' : 'Velika Britanija', 'France' : 'Francija', 'China' : 'Kitajska', 'Pakistan' : 'Pakistan', 'North Korea' : 'Severna Koreja', 'Israel' : 'Izrael'}
+#kreiranje drzav
+imena_drzav = {'United States' : 'ZDA', 'India' : 'Indija', 'USSR/Russia' : 'USSR/RUSIJA', 'United&nbsp;Kingdom' : 'Velika Britanija', 'France' : 'Francija', 'China' : 'Kitajska', 'Pakistan' : 'Pakistan', 'North Korea' : 'Severna Koreja', 'Israel' : 'Izrael'}
 slovar_zalog = pretvori_zaloge_v_slovar(izlusci_zaloge(preberi(url_zaloga)), imena_drzav)
 drzave = list()
 for ime_drzave in imena_drzav.values():
     tren_drzava = Drzava(ime_drzave, zaloga = slovar_zalog[ime_drzave] if ime_drzave in slovar_zalog else 0)
     if ime_drzave == 'ZDA':
         tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_am(preberi(url_am))))
-    elif ime_drzave == 'USSR/Rusija':
+    elif ime_drzave == 'USSR/RUSIJA':
         tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_fr_kt_ru(preberi(url_rus))))
     elif ime_drzave == 'Francija':
         tren_drzava.nastavi_nuk_teste(ustvari_objekte(izlusci_fr_kt_ru(preberi(url_fr))))
