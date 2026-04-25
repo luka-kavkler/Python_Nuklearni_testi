@@ -4,21 +4,21 @@ from razredi import Drzava, Nuk_t
 
 def osnovne_informacije_o_drzavah():
     """vpraša katera država te zanima, jo izpiše in vrne"""
-    prevod_vnosov = {'ZDA': 'ZDA','FR' : 'Francija', 'USSR' : 'USSR/RUSIJA', 'KIT' : 'Kitajska', 'IZ' : 'Izrael', 'IN' : 'Indija', 'NK' : 'Severna Koreja', 'P': 'Pakistan'}
+    prevod_vnosov = {'ZDA': 'ZDA','FR' : 'Francija', 'VB' : 'Velika Britanija', 'USSR' : 'USSR/RUSIJA', 'KIT' : 'Kitajska', 'IZ' : 'Izrael', 'IN' : 'Indija', 'NK' : 'Severna Koreja', 'P': 'Pakistan'}
     ime = input(f'Katera država te zanima? {list(prevod_vnosov.items())}:\n').upper()
     izbrana = Drzava.poisci_drzavo(drzave, prevod_vnosov[ime])
     print(izbrana)
     return izbrana
 
 def primerjalni_podatki(drzava1):
-    prevod_vnosov = {'ZDA': 'ZDA','FR' : 'Francija', 'USSR' : 'USSR/RUSIJA', 'KIT' : 'Kitajska', 'IZ' : 'Izrael', 'IN' : 'Indija', 'NK' : 'Severna Koreja', 'P': 'Pakistan'}
+    prevod_vnosov = {'ZDA': 'ZDA','FR' : 'Francija', 'VB' : 'Velika Britanija', 'USSR' : 'USSR/RUSIJA', 'KIT' : 'Kitajska', 'IZ' : 'Izrael', 'IN' : 'Indija', 'NK' : 'Severna Koreja', 'P': 'Pakistan'}
     ime = input(f'Zapiši katero državo želiš izbrati za primerjavo. {list(prevod_vnosov.items())}:\n').upper()
     
     if ime not in prevod_vnosov:
         print('Vnos ni bil pravilen; Poskusi ponovno')
         primerjalni_podatki(drzava1)
         return
-    prevod_vnosov = {'ZDA': 'ZDA','FR' : 'Francija', 'USSR' : 'USSR/RUSIJA', 'KIT' : 'Kitajska', 'IZ' : 'Izrael', 'IN' : 'Indija', 'NK' : 'Severna Koreja', 'P': 'Pakistan'}
+    prevod_vnosov = {'ZDA': 'ZDA','FR' : 'Francija','VB' : 'Velika Britanija', 'USSR' : 'USSR/RUSIJA', 'KIT' : 'Kitajska', 'IZ' : 'Izrael', 'IN' : 'Indija', 'NK' : 'Severna Koreja', 'P': 'Pakistan'}
     lastnosti = {'število serij', 'skupno število testov', 'skupna sproščena energija', 'zaloga'}
     drzava2 = Drzava.poisci_drzavo(drzave, prevod_vnosov[ime])
     lastnost = input('Po kateri lastnosti želiš primerjati državi? (število serij, skupno število testov, skupna sproščena energija, zaloga):\n').lower()
@@ -48,8 +48,11 @@ def risanje_grafov(drzava):
     """Vpraša uporabnika kateri graf želi in ga izriše"""
     if not isinstance(drzava, Drzava):
         raise ValueError
+    if drzava.get_ime() not in {'ZDA', 'Velika Britanija', 'Francija', 'USSR/RUSIJA', 'Kitajska'}:
+        print('Žal je ta funkcija omogočena zgolj za države: ZDA, Velika Britanija, Francija, USSR/RUSIJA, Kitajska')
+        return  
     veljavni = {'povprečna', 'skupna'}
-    vnos = input('Te zanima povprečna ali skupna sproščena energija? (povprečna/skupna):\n').lower()
+    vnos = input('Te zanima povprečna ali skupna sproščena energija po serijah? (povprečna/skupna):\n').lower()
     if vnos not in veljavni:
         print('Vnos ni veljaven.')
         if input('Želite poskusiti še enkrat?(Ja/Ne)') == 'Ja':

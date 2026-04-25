@@ -108,17 +108,25 @@ class Drzava:
     
     #Izris
     def narisi_serije_po_skupni_energiji(self):
+        """Narise graf skupnih energij, pri čemer posebej označi top 5"""
         Y = [x.get_skupna_energija() for x in self.get_n_testi()]
-        labeli_za_X = [x.get_serija() for x in self.get_n_testi()]
-        vecji = sorted(Y)[:5]
-        vecji_i = [Y.index(x) for x in vecji]
-        izbrani_X = [labeli_za_X[i] for i in vecji_i]
+        labeli_za_X = [f'{x.get_serija()}\n({x.get_leta()[0]}-{x.get_leta()[1]})' for x in self.get_n_testi()]
         
-        fig = plt.figure()
-        plt.plot(list(range(len(Y))),Y)
+        top_5 = sorted(list(enumerate(Y)), key = lambda x: x[1])[-5:]
+        top_5_i = [x[0] for x in top_5]
+        top_5_y = [x[1] for x in top_5]
+        izbrani_X = [labeli_za_X[i] for i in top_5_i]
+        
+        fig = plt.figure(figsize = (10, 6))
+        plt.plot(list(range(len(Y))),Y, color = "#1fb487", linewidth = 1.5)
+        plt.scatter(top_5_i, top_5_y, color= 'red', zorder = 100, s=20) #pikice na ta vecjih 5-ih
+        
         plt.yscale('log')
-        plt.xticks(vecji_i, izbrani_X, fontsize = 6)
-        plt.title('Serije po skupni energiji')
+        plt.xticks(top_5_i, izbrani_X, fontsize = 8, rotation = 45, ha = 'right')
+        plt.title(f'Serije po skupni energiji ({self.get_ime()})')
+        plt.grid(True, which="both", linestyle="--", alpha=0.3)
+
+        plt.tight_layout()
         plt.show()
         plt.close()
         return
@@ -126,18 +134,25 @@ class Drzava:
 
     
     def narisi_serije_po_povprecni_energiji(self):
+        """Narise graf povprecni energij, pri čemer posebej označi top 5"""
         Y = [x.get_povprecna() for x in self.get_n_testi()]
-        labeli_za_X = [x.get_serija() for x in self.get_n_testi()]
-        vecji = sorted(Y)[:5]
-        vecji_i = [Y.index(x) for x in vecji]
-        izbrani_X = [labeli_za_X[i] for i in vecji_i]
-
-        X = list(range(len(Y)))
-        fig = plt.figure()
-        plt.plot(X, Y)
+        labeli_za_X = [f'{x.get_serija()}\n({x.get_leta()[0]}-{x.get_leta()[1]})' for x in self.get_n_testi()]
+        
+        top_5 = sorted(list(enumerate(Y)), key = lambda x: x[1])[-5:]
+        top_5_i = [x[0] for x in top_5]
+        top_5_y = [x[1] for x in top_5]
+        izbrani_X = [labeli_za_X[i] for i in top_5_i]
+        
+        fig = plt.figure(figsize = (10, 6))
+        plt.plot(list(range(len(Y))), Y, color = "#1fb487", linewidth = 1.5)
+        plt.scatter(top_5_i, top_5_y, color= 'red', zorder = 100, s=20) #pikice na ta vecjih 5-ih
+        
         plt.yscale('log')
-        plt.xticks(vecji_i, izbrani_X, fontsize = 6)
-        plt.title('Serije po povprecni energiji')
+        plt.xticks(top_5_i, izbrani_X, fontsize = 8, rotation = 45, ha = 'right')
+        plt.title(f'Serije po povprecni energiji ({self.get_ime()})')
+        plt.grid(True, which="both", linestyle="--", alpha=0.3)
+
+        plt.tight_layout()
         plt.show()
         plt.close()
         return
